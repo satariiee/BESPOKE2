@@ -247,6 +247,8 @@ export type CreateCalonJemaahPayload = {
   alamat?: string;
   sumber?: string;
   paket?: string;
+  umur?: number;
+  email?: string;
   staff_id?: number;
   status_komunikasi?: string;
   notes?: string;

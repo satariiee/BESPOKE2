@@ -15,6 +15,8 @@ class CalonJemaah extends Model
     protected $fillable = [
         'nama',
         'kontak',
+        'umur',
+        'email',
         'alamat',
         'sumber',
         'paket',

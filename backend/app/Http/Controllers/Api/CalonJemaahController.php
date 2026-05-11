@@ -60,8 +60,10 @@ class CalonJemaahController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'nama' => ['required', 'string', 'max:255'],
-            'kontak' => ['required', 'string', 'max:30'],
+            'nama' => ['required', 'string', 'max:100', 'regex:/^[\p{L}\s\'\-]+$/u'],
+            'kontak' => ['required', 'string', 'max:20', 'regex:/^[0-9+]+$/'],
+            'umur' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'email' => ['nullable', 'string', 'max:255', 'regex:/^[^@\s]+@[^@\s]+\.[^@\s]+$/'],
             'alamat' => ['nullable', 'string'],
             'sumber' => ['nullable', 'string', 'max:255'],
             'paket' => ['nullable', 'string', 'max:255'],
@@ -120,8 +122,10 @@ class CalonJemaahController extends Controller
     public function update(Request $request, CalonJemaah $calonJemaah): JsonResponse
     {
         $validated = $request->validate([
-            'nama' => ['sometimes', 'required', 'string', 'max:255'],
-            'kontak' => ['sometimes', 'required', 'string', 'max:30'],
+            'nama' => ['sometimes', 'required', 'string', 'max:100', 'regex:/^[\p{L}\s\'\-]+$/u'],
+            'kontak' => ['sometimes', 'required', 'string', 'max:20', 'regex:/^[0-9+]+$/'],
+            'umur' => ['sometimes', 'nullable', 'integer', 'min:1', 'max:100'],
+            'email' => ['sometimes', 'nullable', 'string', 'max:255', 'regex:/^[^@\s]+@[^@\s]+\.[^@\s]+$/'],
             'alamat' => ['sometimes', 'nullable', 'string'],
             'sumber' => ['sometimes', 'nullable', 'string', 'max:255'],
             'paket' => ['sometimes', 'nullable', 'string', 'max:255'],
@@ -200,8 +204,10 @@ class CalonJemaahController extends Controller
             $row['errors'] = [];
 
             $validator = Validator::make($row, [
-                'nama' => ['required', 'string', 'max:255'],
-                'kontak' => ['required', 'string', 'max:30'],
+                'nama' => ['required', 'string', 'max:100', 'regex:/^[\p{L}\s\'\-]+$/u'],
+                'kontak' => ['required', 'string', 'max:20', 'regex:/^[0-9+]+$/'],
+                'umur' => ['nullable', 'integer', 'min:1', 'max:100'],
+                'email' => ['nullable', 'string', 'max:255', 'regex:/^[^@\s]+@[^@\s]+\.[^@\s]+$/'],
                 'alamat' => ['nullable', 'string'],
                 'sumber' => ['nullable', 'string', 'max:255'],
                 'paket' => ['nullable', 'string', 'max:255'],
@@ -248,6 +254,8 @@ class CalonJemaahController extends Controller
             $payload = [
                 'nama' => $row['nama'],
                 'kontak' => $row['kontak'],
+                'umur' => is_numeric($row['umur']) ? (int) $row['umur'] : null,
+                'email' => $row['email'] ?: null,
                 'alamat' => $row['alamat'] ?: null,
                 'sumber' => $row['sumber'] ?: null,
                 'paket' => $row['paket'] ?: null,
@@ -402,6 +410,8 @@ class CalonJemaahController extends Controller
             'id' => $jemaah->id,
             'nama' => $jemaah->nama,
             'kontak' => $jemaah->kontak,
+            'umur' => $jemaah->umur,
+            'email' => $jemaah->email,
             'alamat' => $jemaah->alamat,
             'sumber' => $jemaah->sumber,
             'paket' => $jemaah->paket,
@@ -424,10 +434,12 @@ class CalonJemaahController extends Controller
                 'nama', 'name' => 'nama',
                 'kontak', 'no_hp', 'no_wa', 'phone', 'nomor_whatsapp' => 'kontak',
                 'alamat', 'address', 'kota' => 'alamat',
+                'umur', 'age' => 'umur',
                 'sumber', 'sumber_lead', 'lead_source' => 'sumber',
                 'paket', 'paket_diminati' => 'paket',
                 'status_komunikasi', 'status' => 'status_komunikasi',
                 'notes', 'catatan' => 'notes',
+                'email', 'e-mail' => 'email',
                 'staff_email', 'email_staff' => 'staff_email',
                 default => $key,
             };
@@ -441,6 +453,8 @@ class CalonJemaahController extends Controller
         $mapped = [
             'nama' => '',
             'kontak' => '',
+            'umur' => '',
+            'email' => '',
             'alamat' => '',
             'sumber' => '',
             'paket' => '',

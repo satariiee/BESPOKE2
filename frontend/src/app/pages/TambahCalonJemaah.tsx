@@ -51,6 +51,8 @@ export function TambahCalonJemaah() {
 
       setNama(data.nama);
       setWhatsapp(data.kontak);
+      setUmur(data.umur ? String(data.umur) : "");
+      setEmail(data.email || "");
       setKota(data.alamat || "");
       setSumberLead(data.sumber || "");
       setPaket(data.paket || "");
@@ -78,14 +80,46 @@ export function TambahCalonJemaah() {
       return;
     }
 
+    // Additional validations
+    const nameValid = /^[\p{L}\s'\-]{1,100}$/u.test(nama.trim());
+    if (!nameValid) {
+      toast.error("Nama hanya boleh berisi huruf dan spasi (maks 100 karakter)");
+      return;
+    }
+
+    if (umur) {
+      const umurVal = Number(umur);
+      if (Number.isNaN(umurVal) || umurVal < 1 || umurVal > 100) {
+        toast.error("Umur harus berupa angka antara 1 sampai 100");
+        return;
+      }
+    }
+
+    const whatsappClean = whatsapp.replace(/[^0-9+]/g, "");
+    if (!/^[0-9+]{6,20}$/.test(whatsappClean)) {
+      toast.error("Nomor WhatsApp harus berupa angka (6-20 digit), tanpa huruf");
+      return;
+    }
+
+    if (email) {
+      // require domain part (e.g. example.com) after @ and at least one dot
+      const emailValid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+      if (!emailValid) {
+        toast.error("Email tidak valid — sertakan domain (mis. user@example.com)");
+        return;
+      }
+    }
+
     try {
       setSaving(true);
       const payload = {
         nama,
-        kontak: whatsapp,
+        kontak: whatsappClean,
+        email: email || undefined,
         alamat: kota || undefined,
         sumber: sumberLead || undefined,
         paket: paket || undefined,
+        umur: umur ? Number(umur) : undefined,
         notes: catatan || undefined,
       };
 
@@ -205,7 +239,18 @@ export function TambahCalonJemaah() {
               <Label htmlFor="namaLengkap">
                 Nama Lengkap <span className="text-red-500">*</span>
               </Label>
-              <Input id="namaLengkap" placeholder="Masukkan nama lengkap" value={nama} onChange={(e) => setNama(e.target.value)} required />
+              <Input
+                id="namaLengkap"
+                placeholder="Masukkan nama lengkap"
+                value={nama}
+                maxLength={100}
+                onChange={(e) => {
+                  // Allow only letters and spaces, prevent digits and symbols
+                  const cleaned = e.target.value.replace(/[^\p{L}\s'-]/gu, "");
+                  setNama(cleaned);
+                }}
+                required
+              />
             </div>
 
             <div className="space-y-2">
@@ -237,7 +282,20 @@ export function TambahCalonJemaah() {
               <Label htmlFor="umur">
                 Umur <span className="text-red-500">*</span>
               </Label>
-              <Input id="umur" type="number" placeholder="Masukkan umur" min="1" max="120" value={umur} onChange={(e) => setUmur(e.target.value)} required />
+              <Input
+                id="umur"
+                type="number"
+                placeholder="Masukkan umur"
+                min={1}
+                max={100}
+                value={umur}
+                onChange={(e) => {
+                  // Keep numeric only and limit to 3 chars; backend will enforce <= 100
+                  const v = e.target.value.replace(/[^0-9]/g, "");
+                  setUmur(v.slice(0, 3));
+                }}
+                required
+              />
             </div>
           </CardContent>
         </Card>
@@ -259,7 +317,19 @@ export function TambahCalonJemaah() {
               </Label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input id="whatsapp" placeholder="0812-3456-7890" className="pl-10" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} required />
+                <Input
+                  id="whatsapp"
+                  placeholder="081234567890"
+                  className="pl-10"
+                  value={whatsapp}
+                  maxLength={20}
+                  onChange={(e) => {
+                    // Allow digits and plus sign only
+                    const cleaned = e.target.value.replace(/[^0-9+]/g, "");
+                    setWhatsapp(cleaned.slice(0, 20));
+                  }}
+                  required
+                />
               </div>
             </div>
 
@@ -267,7 +337,7 @@ export function TambahCalonJemaah() {
               <Label htmlFor="email">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input id="email" type="email" placeholder="email@example.com" className="pl-10" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <Input id="email" type="email" placeholder="email@example.com" className="pl-10" value={email} maxLength={255} onChange={(e) => setEmail(e.target.value.trim())} />
               </div>
             </div>
 
