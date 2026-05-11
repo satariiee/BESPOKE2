@@ -70,6 +70,8 @@ export type CalonJemaah = {
   id: number;
   nama: string;
   kontak: string;
+  umur: number | null;
+  email: string | null;
   alamat: string | null;
   sumber: string | null;
   paket: string | null;

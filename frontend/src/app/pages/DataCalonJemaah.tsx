@@ -338,7 +338,7 @@ export function DataCalonJemaah() {
         <DialogContent className="max-w-5xl">
           <DialogHeader>
             <DialogTitle>Import Data Calon Jemaah</DialogTitle>
-            <DialogDescription>Upload file CSV atau XLSX, cek preview validasi, lalu proses import ke database.</DialogDescription>
+            <DialogDescription>Upload file CSV (pemisah titik koma/semicolon) atau XLSX. Gunakan template CSV agar setiap header tampil per kolom di spreadsheet.</DialogDescription>
           </DialogHeader>
 
           <div className="flex items-center gap-3">
@@ -354,7 +354,7 @@ export function DataCalonJemaah() {
             <div className="space-y-4">
               <div className="rounded-xl border border-dashed border-gray-300 p-6">
                 <div className="mb-4 flex items-center justify-between">
-                  <p className="text-sm text-gray-600">Gunakan template resmi agar kolom sesuai validasi sistem.</p>
+                  <p className="text-sm text-gray-600">Gunakan template CSV dengan pemisah titik koma agar header tampil per kolom dan mudah dibuka di spreadsheet.</p>
                   <Button variant="outline" className="gap-2" onClick={handleTemplateDownload}>
                     <Download className="w-4 h-4" /> Download Template
                   </Button>
@@ -374,7 +374,7 @@ export function DataCalonJemaah() {
                   />
                 </label>
 
-                <p className="mt-2 text-xs text-gray-500">Format didukung: CSV, XLSX. Maksimal ukuran file: 4MB.</p>
+                <p className="mt-2 text-xs text-gray-500">Format didukung: CSV, XLSX. Template paling disarankan: CSV.</p>
               </div>
 
               <div className="flex justify-end">

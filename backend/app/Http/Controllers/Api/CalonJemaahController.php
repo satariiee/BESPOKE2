@@ -172,9 +172,9 @@ class CalonJemaahController extends Controller
 
         $extension = strtolower($file->getClientOriginalExtension() ?: '');
 
-        if (!in_array($extension, ['csv', 'txt', 'xlsx'], true)) {
+        if (!in_array($extension, ['csv', 'txt', 'tsv', 'xlsx'], true)) {
             return response()->json([
-                'message' => 'Format file tidak didukung. Gunakan file CSV atau XLSX.',
+                'message' => 'Format file tidak didukung. Gunakan file TSV, CSV, atau XLSX.',
             ], 422);
         }
 
@@ -478,7 +478,7 @@ class CalonJemaahController extends Controller
 
     private function extractImportRows(string $path, string $extension): array
     {
-        if (in_array($extension, ['csv', 'txt'], true)) {
+        if (in_array($extension, ['csv', 'txt', 'tsv'], true)) {
             return $this->extractCsvRows($path);
         }
 
@@ -497,17 +497,20 @@ class CalonJemaahController extends Controller
             throw new \RuntimeException('Gagal membaca file CSV.');
         }
 
-        $header = fgetcsv($handle);
+        $firstLine = fgets($handle);
 
-        if ($header === false) {
+        if ($firstLine === false) {
             fclose($handle);
             throw new \RuntimeException('Header CSV tidak ditemukan.');
         }
 
+        $delimiter = $this->detectDelimiter($firstLine);
+        $header = str_getcsv(rtrim($firstLine, "\r\n"), $delimiter);
+
         $rows = [];
         $line = 1;
 
-        while (($row = fgetcsv($handle)) !== false) {
+        while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
             $line++;
             $rows[] = [
                 'row_number' => $line,
@@ -518,6 +521,24 @@ class CalonJemaahController extends Controller
         fclose($handle);
 
         return [$header, $rows];
+    }
+
+    private function detectDelimiter(string $line): string
+    {
+        $candidates = ["\t", ';', '|', ','];
+        $bestDelimiter = ',';
+        $bestCount = 0;
+
+        foreach ($candidates as $delimiter) {
+            $count = substr_count($line, $delimiter);
+
+            if ($count > $bestCount) {
+                $bestCount = $count;
+                $bestDelimiter = $delimiter;
+            }
+        }
+
+        return $bestDelimiter;
     }
 
     private function extractXlsxRows(string $path): array
